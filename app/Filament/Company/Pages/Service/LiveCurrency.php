@@ -20,6 +20,8 @@ class LiveCurrency extends Page
     #[Url]
     public ?string $activeTab = null;
 
+    public bool $forexEnabled;
+
     public function getTitle(): string | Htmlable
     {
         return translate(static::$title);
@@ -38,7 +40,7 @@ class LiveCurrency extends Page
     public function mount(): void
     {
         $this->loadDefaultActiveTab();
-        abort_unless(Forex::isEnabled(), 403);
+        $this->forexEnabled = Forex::isEnabled();
     }
 
     protected function loadDefaultActiveTab(): void
@@ -57,9 +59,16 @@ class LiveCurrency extends Page
 
     public function getViewData(): array
     {
+        if (! $this->forexEnabled) {
+            return [
+                'forexEnabled' => $this->forexEnabled,
+            ];
+        }
+
         return [
             'currencyListQuery' => CurrencyList::query()->count(),
             'companyCurrenciesQuery' => Currency::query()->count(),
+            'forexEnabled' => $this->forexEnabled,
         ];
     }
 }
